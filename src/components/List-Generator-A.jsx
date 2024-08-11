@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import ScoreBoard from './ScoreBoard';
-import Card from './Card';
 
 const ListGenerator = () => {
   const [characters, setCharacters] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
-  const [score, setScore] = useState({ currentScore: 0, bestScore: 0 });
+  const [score, setScore] = useState( { currentScore: 0, bestScore: 0} );
 
   const generateRandomNumbers = () => {
     return Array.from({ length: 10 }, () => Math.floor(Math.random() * 826) + 1);
@@ -35,33 +33,42 @@ const ListGenerator = () => {
   const cardClick = (index) => {
     const charactersCopy = [...characters];
     const scoreCopy = { ...score };
-
     if (charactersCopy[index].clicked === true) {
       alert('You already clicked this character!');
-      setScore({ currentScore: 0, bestScore: scoreCopy.bestScore });
+      setScore(prevScore => ({ 
+        ...prevScore, 
+        currentScore: 0 
+      }));
+      // Restart game
       fetchCharacters();
     } else {
-      charactersCopy[index].clicked = true;
-      const newScore = scoreCopy.currentScore + 1;
-      setScore({
-        currentScore: newScore,
-        bestScore: Math.max(newScore, scoreCopy.bestScore),
+      charactersCopy[index].clicked = true
+      setScore(prevScore => {
+        const newScore = prevScore.currentScore + 1;
+        return {
+          currentScore: newScore,
+          bestScore: Math.max(newScore, prevScore.bestScore),
+        };
       });
       shuffleArray(charactersCopy);
     }
-
     setCharacters(charactersCopy);
-  };
+  }
 
   return (
     <div>
       <button onClick={fetchCharacters}>
         {hasStarted ? 'Restart' : 'Start'}
       </button>
-      <ScoreBoard currentScore={score.currentScore} bestScore={score.bestScore} />
+      <div className='score-board'>
+        <p>Current Score: {score.currentScore}</p>
+        <p>Best Score: {score.bestScore}</p>
+      </div>
       <div className='card-container'>
         {characters.map((character, index) => (
-          <Card key={index} character={character} onClick={() => cardClick(index)} />
+          <div onClick={() => cardClick(index)} key={index} className='card'>
+            <img src={character.img} alt={`Character ${character.key}`} />
+          </div>
         ))}
       </div>
     </div>
